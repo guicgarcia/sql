@@ -18,33 +18,33 @@ DO BEGIN
     *      O equipamento precisa estar associado a um cliente que não seja o cliente RHB de id = 1.
     */
 
-	DECLARE fimloop INT DEFAULT FALSE;
-	DECLARE valorCompra DOUBLE;
+    DECLARE fimloop INT DEFAULT FALSE; 
+    DECLARE valorCompra DOUBLE;
     DECLARE taxaDepreciacao DOUBLE;
     
     DECLARE meucursor CURSOR FOR SELECT valor_compra FROM equipaments;
-	DECLARE CONTINUE HANDLER FOR NOT FOUND SET fimloop = TRUE;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET fimloop = TRUE;
     
     OPEN meucursor;
 
 	read_loop: LOOP
-		FETCH meucursor INTO valorCompra, numeroNotaFiscal;
+	FETCH meucursor INTO valorCompra, numeroNotaFiscal;
 		IF fimloop THEN
 		  LEAVE read_loop;
 		END IF;
         
         /*Atualização mensal da quantidade de meses depreciados.*/
-		UPDATE equipaments SET meses_depreciacao = meses_depreciacao + 1 
+	UPDATE equipaments SET meses_depreciacao = meses_depreciacao + 1 
         WHERE meses_depreciacao <= 35 AND numero_nota_fiscal != null AND client_id != 1 AND ;
     
         /*Taxa de depreciação mensal*/
-		SET taxaDepreciacao = valorCompra / 36 ;
+	SET taxaDepreciacao = valorCompra / 36 ;
         /*Atualização mensal do valor total depreciado.*/
         UPDATE equipaments SET total_valor_depreciacao = total_valor_depreciacao + taxaDepreciacao 
         WHERE meses_depreciacao <= 35 AND numero_nota_fiscal != null AND client_id != 1;
 		
         /*Atualização mensal da quantidade de meses em que o equipamento ficou guardado no estoque.*/
-		UPDATE equipaments SET meses_guardado_rhb = meses_guardado_rhb + 1 
+	UPDATE equipaments SET meses_guardado_rhb = meses_guardado_rhb + 1 
         WHERE meses_depreciacao <= 35 AND client_id = 1;
 	END LOOP;
 
